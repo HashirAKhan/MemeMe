@@ -87,7 +87,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     
     @objc func keyboardWillHide(_ notification:Notification){
-        view.frame.origin.y += 0
+        view.frame.origin.y = 0
     }
     
     func subscribeToKeyboardNotifications() {
