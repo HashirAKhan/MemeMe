@@ -10,6 +10,12 @@ import UIKit
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
     
+    struct Meme{
+        var topText: String?
+        var bottomText: String?
+        var originalImage: UIImage
+        var memedImage: UIImage
+    }
     
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var cameraButton: UIBarButtonItem!
@@ -113,5 +119,26 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return (true)
+    }
+    
+    func generateMemedImage() -> UIImage {
+
+        // Render view to an image
+        UIGraphicsBeginImageContext(self.view.frame.size)
+        view.drawHierarchy(in: self.view.frame, afterScreenUpdates: true)
+        let memedImage:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+
+        return memedImage
+    }
+    
+    func save() {
+            // Create the meme
+            let meme = Meme(topText: topTextBox.text!, bottomText: bottomTextBox.text!, originalImage: imageView.image!, memedImage: memedImage)
+    }
+    
+    func setToolbarState(_ hidden: Bool) {
+        topToolbar.isHidden = hidden
+        bottomToolbar.isHidden = hidden
     }
 }
