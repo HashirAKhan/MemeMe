@@ -21,6 +21,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     @IBOutlet weak var cameraButton: UIBarButtonItem!
     @IBOutlet weak var topTextBox: UITextField!
     @IBOutlet weak var bottomTextBox: UITextField!
+    @IBOutlet weak var shareButton: UIBarButtonItem!
+    @IBOutlet weak var topToolbar: UIToolbar!
+    @IBOutlet weak var bottomToolbar: UIToolbar!
     
     let memeTextAttributes: [NSAttributedString.Key: Any] = [
                NSAttributedString.Key.strokeColor: UIColor.black,
@@ -43,12 +46,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         bottomTextBox.text = "BOTTOM"
         bottomTextBox.textAlignment = .center
         bottomTextBox.clearsOnBeginEditing = true;
-        
-        
+        shareButton.isEnabled = false
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
+        
         subscribeToKeyboardNotifications()
     }
     
@@ -62,6 +65,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         pickerController.delegate = self
         pickerController.sourceType = .photoLibrary
         present(pickerController, animated: true, completion: nil)
+        shareButton.isEnabled = true
+        
     }
     
     @IBAction func takeImageButton(_ sender: Any) {
@@ -69,6 +74,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         pickerController.delegate = self
         pickerController.sourceType = .camera
         present(pickerController, animated: true, completion: nil)
+        shareButton.isEnabled = true
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]){
@@ -122,23 +128,38 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     func generateMemedImage() -> UIImage {
+        
+        setToolbarState(true)
 
         // Render view to an image
         UIGraphicsBeginImageContext(self.view.frame.size)
         view.drawHierarchy(in: self.view.frame, afterScreenUpdates: true)
         let memedImage:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
+        
+        setToolbarState(false)
 
         return memedImage
     }
     
     func save() {
             // Create the meme
-            let meme = Meme(topText: topTextBox.text!, bottomText: bottomTextBox.text!, originalImage: imageView.image!, memedImage: memedImage)
+        _ = Meme(topText: topTextBox.text!, bottomText: bottomTextBox.text!, originalImage: imageView.image!, memedImage: generateMemedImage())
     }
     
     func setToolbarState(_ hidden: Bool) {
         topToolbar.isHidden = hidden
         bottomToolbar.isHidden = hidden
+    }
+    
+    @IBAction func pressShareButton(_ sender: Any) {
+        let memedImage = generateMemedImage()
+        let controller = UIActivityViewController(activityItems: [memedImage], applicationActivities: nil)
+        controller.completionWithItemsHandler = {(activityType: UIActivity.ActivityType?, completed: Bool, returnedItems: [Any]?, error: Error?)  in
+            
+            self.save()
+            
+        }
+        self.present(controller, animated: true, completion: nil)
     }
 }
